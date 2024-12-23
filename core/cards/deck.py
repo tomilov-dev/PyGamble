@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 from enum import Enum
+from typing import Hashable
 from pydantic import BaseModel
 from pydantic import field_validator
 
@@ -14,7 +15,7 @@ from cards.card import SuitDDM
 from cards.card import RankDDM
 
 
-class Deck(BaseModel):
+class DeckDDM(BaseModel):
     """
     Represents a deck of playing cards.
     """
@@ -37,6 +38,21 @@ class Deck(BaseModel):
             raise ValueError("Invalid deck size. Only 52 and 36 are supported.")
 
 
+class PlayerHandDDM(BaseModel):
+    """
+    Represents a player's hand.
+    """
+
+    player_id: Hashable
+    cards: list[CardDDM] = []
+
+    def add_card(self, card: CardDDM) -> None:
+        self.cards.append(card)
+
+    def remove_card(self, card: CardDDM) -> None:
+        self.cards.remove(card)
+
+
 class DeckManager:
     """
     Represents a deck of playing cards.
@@ -45,7 +61,7 @@ class DeckManager:
     def __init__(
         self,
         rng: IRandomNumberGenerator,
-        deck: Deck,
+        deck: DeckDDM,
     ) -> None:
         self.rng = rng
         self.deck = deck

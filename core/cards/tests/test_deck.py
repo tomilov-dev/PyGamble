@@ -6,27 +6,26 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 sys.path.append(str(ROOT_DIR))
 
 from rng.base import BaseRandomNumberGenerator
-from cards.card import CardDDM
-from cards.deck import Deck
-from cards.deck import DeckManager
+from cards.card import CardDDM, SuitDDM, RankDDM
+from cards.deck import DeckDDM, DeckManager, PlayerHandDDM
 
 
 def test_deck_initialization():
-    deck = Deck(size=52)
+    deck = DeckDDM(size=52)
     assert len(deck.cards) == 52
     assert all(isinstance(card, CardDDM) for card in deck.cards)
 
-    deck = Deck(size=36)
+    deck = DeckDDM(size=36)
     assert len(deck.cards) == 36
     assert all(isinstance(card, CardDDM) for card in deck.cards)
 
     with pytest.raises(ValueError):
-        Deck(size=40)
+        DeckDDM(size=40)
 
 
 def test_deck_manager_shuffle():
     rng = BaseRandomNumberGenerator()
-    deck = Deck(size=52)
+    deck = DeckDDM(size=52)
     manager = DeckManager(rng=rng, deck=deck)
 
     original_order = deck.cards.copy()
@@ -38,7 +37,7 @@ def test_deck_manager_shuffle():
 
 def test_deck_manager_deal():
     rng = BaseRandomNumberGenerator()
-    deck = Deck(size=52)
+    deck = DeckDDM(size=52)
     manager = DeckManager(rng=rng, deck=deck)
 
     dealt_cards = manager.deal(5)
@@ -47,3 +46,20 @@ def test_deck_manager_deal():
 
     with pytest.raises(ValueError):
         manager.deal(48)
+
+
+def test_player_hand_add_card():
+    player_hand = PlayerHandDDM(player_id=1)
+    card = CardDDM(suit=SuitDDM.HEARTS, rank=RankDDM.ACE)
+    player_hand.add_card(card)
+    assert len(player_hand.cards) == 1
+    assert player_hand.cards[0] == card
+
+
+def test_player_hand_remove_card():
+    player_hand = PlayerHandDDM(player_id=1)
+    card = CardDDM(suit=SuitDDM.HEARTS, rank=RankDDM.ACE)
+    player_hand.add_card(card)
+    assert len(player_hand.cards) == 1
+    player_hand.remove_card(card)
+    assert len(player_hand.cards) == 0
